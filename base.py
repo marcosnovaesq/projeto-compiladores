@@ -1,3 +1,6 @@
+example_numerical_token_definition = {'token_type': 'NUMBER', 'numerical_value': 234, 'string_value': '234'}
+example_literal_token_definition = {'token_type': 'LITERAL', 'string_value': 'joaozinho'}
+# add more examples above
 
 tokens = []
 
