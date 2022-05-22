@@ -19,6 +19,10 @@ def lexemize_file(filename):
                 elif char in compound_first_char and curr_tkn == "":
                     curr_tkn += char
                     continue
+                elif char in compound_first_char and curr_tkn != "":
+                    lexemes.append(curr_tkn + char)
+                    curr_tkn = ""
+                    continue
                 elif (curr_tkn + char) in compound_token_delimiters:
                     curr_tkn += char
                     lexemes.append(curr_tkn)
@@ -40,7 +44,7 @@ def lexemize_file(filename):
             if curr_tkn != "":
                 lexemes.append(curr_tkn)
             if has_new_line:
-                lexemes.append('\n')
+                # lexemes.append('\n')
                 has_new_line = False
             line = f.readline()
     print(lexemes)
