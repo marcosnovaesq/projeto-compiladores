@@ -54,19 +54,17 @@ with open("example.txt") as f:
         curr_tkn = ""
         has_new_line = False
         for char in line:
-            # tkn_delimiters
             if char == " ":
-                # process token and continue
                 if curr_tkn != "":
                     tokens.append(curr_tkn)
                 curr_tkn = ""
                 continue
+            # add more token delimiter and maybe array token delimiter
             elif char == "[" or char == "]" or char == "{" or char == "}" or char == "=" or char == "+" or char == "-" or char == ">" or char == "<":
                 if curr_tkn != "":
                     tokens.append(curr_tkn)
                 tokens.append(char)
                 curr_tkn = ""
-                # process old token and add this token
                 continue
             else:
                 if '\n' in char:
