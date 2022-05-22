@@ -10,7 +10,7 @@ example_literal_token_definition = {
 }
 # add more examples above
 
-tokens = []
+
 
 rules = [
     ('MAIN', r'main'),  # main
@@ -48,35 +48,41 @@ rules = [
     ('MISMATCH', r'.'),  # ANOTHER CHARACTER
 ]
 
-with open("example.txt") as f:
-    line = f.readline()
-    while line:
-        curr_tkn = ""
-        has_new_line = False
-        for char in line:
-            if char == " ":
-                if curr_tkn != "":
-                    tokens.append(curr_tkn)
-                curr_tkn = ""
-                continue
-            # add more token delimiter and maybe array token delimiter
-            elif char == "[" or char == "]" or char == "{" or char == "}" or char == "=" or char == "+" or char == "-" or char == ">" or char == "<":
-                if curr_tkn != "":
-                    tokens.append(curr_tkn)
-                tokens.append(char)
-                curr_tkn = ""
-                continue
-            else:
-                if '\n' in char:
-                    char = char.replace("\n", "")
-                    has_new_line = True
-                curr_tkn += char
-                continue
-        # end of line processing
-        if curr_tkn != "":
-            tokens.append(curr_tkn)
-        if has_new_line:
-            tokens.append('\n')
-            has_new_line = False
+
+def lexemize_file():
+    tokens = []
+    with open("example.txt") as f:
         line = f.readline()
-print(tokens)
+        while line:
+            curr_tkn = ""
+            has_new_line = False
+            for char in line:
+                if char == " ":
+                    if curr_tkn != "":
+                        tokens.append(curr_tkn)
+                    curr_tkn = ""
+                    continue
+                # add more token delimiter and maybe array token delimiter
+                elif char == "[" or char == "]" or char == "{" or char == "}" or char == "=" or char == "+" or char == "-" or char == ">" or char == "<":
+                    if curr_tkn != "":
+                        tokens.append(curr_tkn)
+                    tokens.append(char)
+                    curr_tkn = ""
+                    continue
+                else:
+                    if '\n' in char:
+                        char = char.replace("\n", "")
+                        has_new_line = True
+                    curr_tkn += char
+                    continue
+            # end of line processing
+            if curr_tkn != "":
+                tokens.append(curr_tkn)
+            if has_new_line:
+                tokens.append('\n')
+                has_new_line = False
+            line = f.readline()
+    print(tokens)
+    return tokens
+
+lexemize_file()
