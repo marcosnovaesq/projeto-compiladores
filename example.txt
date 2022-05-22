@@ -10,5 +10,10 @@ main{
     }elif(a!=5){
         b = 2
     }
-    /* aaaaaaa */
+    else{
+        a = 54
+    }
+
+
+    /* um comentario */
 }
