@@ -1,3 +1,5 @@
-a[2]=2+3
-junin = 54
-cemmil>23
+main{
+    b = 2
+    c = 3
+    a = b + c
+}
