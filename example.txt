@@ -1,2 +1,2 @@
-abc abd 234 567
-heu 234 213 aaa
+a[2]=2+3
+junin = 54
