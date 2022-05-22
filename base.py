@@ -52,14 +52,16 @@ with open("example.txt") as f:
     line = f.readline()
     while line:
         curr_tkn = ""
+        has_new_line = False
         for char in line:
             # tkn_delimiters
             if char == " ":
                 # process token and continue
                 if curr_tkn != "":
                     tokens.append(curr_tkn)
+                curr_tkn = ""
                 continue
-            elif char == "[" or char == "]" or char == "{" or char == "}" or char == "=" or char == "+" or char == "-":
+            elif char == "[" or char == "]" or char == "{" or char == "}" or char == "=" or char == "+" or char == "-" or char == ">" or char == "<":
                 if curr_tkn != "":
                     tokens.append(curr_tkn)
                 tokens.append(char)
@@ -67,10 +69,14 @@ with open("example.txt") as f:
                 # process old token and add this token
                 continue
             else:
+                if '\n' in char:
+                    char = char.replace("\n", "")
+                    has_new_line = True
                 curr_tkn += char
                 continue
         tokens.append(curr_tkn)
-        # splitted_line = line.replace(" ", "")
-        # tokens.append(splitted_line)
+        if has_new_line:
+            tokens.append('\n')
+            has_new_line = False
         line = f.readline()
 print(tokens)
