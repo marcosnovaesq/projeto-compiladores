@@ -72,6 +72,7 @@ with open("example.txt") as f:
                     has_new_line = True
                 curr_tkn += char
                 continue
+        # end of line processing
         if curr_tkn != "":
             tokens.append(curr_tkn)
         if has_new_line:
