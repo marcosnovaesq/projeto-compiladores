@@ -1,3 +1,6 @@
+from regular_expressions import RegexPatternMatching
+import os
+
 single_char_token_delimiters = ['+', '-', '*', '/', '<',  '>',  '=', ';', ',', '(', ')', '[',  ']', '{',  '}' ]
 compound_token_delimiters = ['<=','>=', '==', '!=', '/*', '*/']
 compound_first_char = ['<', '>', '=', '!', '/', '*']
@@ -39,25 +42,24 @@ def lexemize_file(filename):
                 elif char.isnumeric():
                     curr_tkn += char
                     continue
-                # else:
-                #     if '\n' in char:
-                #         char = char.replace("\n", "")
-                #         has_new_line = True
-                #     curr_tkn += char
-                #     continue
-            # end of line processing
             if curr_tkn != "":
                 lexemes.append(curr_tkn)
             if has_new_line:
                 # lexemes.append('\n')
                 has_new_line = False
             line = f.readline()
-    print(lexemes)
     return lexemes
 
+if __name__ == '__main__':
+    example_path = os.path.join(os.path.dirname(__file__), 'examples/sort.cminus')
+    lexemes = lexemize_file(example_path)
+    tokens = RegexPatternMatching().get_patterns_from_lexemes(lexemes)
+    print(tokens)
 
-def tokenize_lexemes(lexemes):
-    print('lexemes')
 
-
-lexemize_file("example.txt")
+# /*
+#     Somebody once told me the world is gonna roll me
+#     I ain't the sharpest tool in the shed
+#     She was looking kind of dumb with her finger and her thumb
+#     In the shape of an "L" on her forehead
+# */
