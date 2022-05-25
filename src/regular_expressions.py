@@ -5,15 +5,15 @@ from typing import List
 
 class RegexPatternMatching():
     rules = [
-        # ('COMMENT',r'\/\*.*\*\/'),
+        ('COMMENT',r'\/\*(.|\n|\r|\n\r|\r\n)*\*\/'),
         ('ELSE', r'else'),  # else
         ('IF', r'if'),  # if
         ('INT', r'int'),  # int
         ('RETURN', r'return'),
         ('VOID', r'void'),
         ('WHILE', r'while'),  # while
-        ('OPEN_COMMENT',r'\/\*'),
-        ('CLOSE_COMMENT',r'\*\/'),
+        # ('OPEN_COMMENT',r'\/\*'),
+        # ('CLOSE_COMMENT',r'\*\/'),
         ('PLUS', r'\+'),  # +
         ('MINUS', r'-'),  # -
         ('MULT', r'\*'),  # *

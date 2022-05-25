@@ -10,27 +10,36 @@ def lexemize_file(filename):
     lexemes = []
     with open(filename) as f:
         line = f.readline()
+        is_on_comment = False
+        curr_tkn = ""
         while line:
-            curr_tkn = ""
-            has_new_line = False
-            for char in line:
-                if char == " ":
+            for char in line: #    {\n
+                if is_on_comment:
+                    curr_tkn += char
+                    if '*/' in curr_tkn:
+                        is_on_comment = False
+                        lexemes.append(curr_tkn)
+                        curr_tkn = ""
+                    continue
+                elif char == " ":
                     if curr_tkn != "":
                         lexemes.append(curr_tkn)
                     curr_tkn = ""
                     continue
-                elif char in compound_first_char:
-                    if curr_tkn.isalpha() or curr_tkn.isnumeric():
+                elif char in compound_first_char: #char eh < #curr_tkn = 9
+                    if curr_tkn.isalpha() or curr_tkn.isnumeric(): # /* asdffaf *
                         lexemes.append(curr_tkn)
                         curr_tkn = char
                         continue
                     curr_tkn += char
+                    if curr_tkn == '/*':
+                        is_on_comment=True
                     continue
                 elif curr_tkn in compound_token_delimiters:
                     lexemes.append(curr_tkn)
                     curr_tkn = char
                     continue
-                elif  char in single_char_token_delimiters:
+                elif char in single_char_token_delimiters:
                     if curr_tkn != "":
                         lexemes.append(curr_tkn)
                     lexemes.append(char)
@@ -42,24 +51,14 @@ def lexemize_file(filename):
                 elif char.isnumeric():
                     curr_tkn += char
                     continue
-            if curr_tkn != "":
+            if curr_tkn != "" and not is_on_comment:
                 lexemes.append(curr_tkn)
-            if has_new_line:
-                # lexemes.append('\n')
-                has_new_line = False
+                curr_tkn = ""
             line = f.readline()
     return lexemes
 
 if __name__ == '__main__':
-    example_path = os.path.join(os.path.dirname(__file__), 'examples/sort.cminus')
+    example_path = os.path.join(os.path.dirname(__file__), 'examples/sort.cminus')# sort.cminus
     lexemes = lexemize_file(example_path)
     tokens = RegexPatternMatching().get_patterns_from_lexemes(lexemes)
     print(tokens)
-
-
-# /*
-#     Somebody once told me the world is gonna roll me
-#     I ain't the sharpest tool in the shed
-#     She was looking kind of dumb with her finger and her thumb
-#     In the shape of an "L" on her forehead
-# */
