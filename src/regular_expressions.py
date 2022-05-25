@@ -57,10 +57,13 @@ class RegexPatternMatching():
         return None
 
     def get_patterns_from_lexemes(self, lexemes: List[str]) -> List[str]:
-        return [
-            (lex, self.get_pattern_rule_from_string(lex))
-            for lex in lexemes
-        ]
+        tokens_list = []
+        for lex in lexemes:
+            token = self.get_pattern_rule_from_string(lex)
+            if token != 'COMMENT':
+                tokens_list.append((lex, self.get_pattern_rule_from_string(lex)))
+        
+        return tokens_list
 
     def search_for_mismatchs(self, lexemes: List[str]) -> List[str]:
         tokens = self.get_patterns_from_lexemes(lexemes)

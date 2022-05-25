@@ -58,7 +58,13 @@ def lexemize_file(filename):
     return lexemes
 
 if __name__ == '__main__':
-    example_path = os.path.join(os.path.dirname(__file__), 'examples/sort.cminus')# sort.cminus
-    lexemes = lexemize_file(example_path)
+    examples_path = {
+        1: os.path.join(os.path.dirname(__file__), 'examples/sort.cminus'),
+        2: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario_simples.cminus'),
+        3: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario_varias_linhas.cminus'),
+        4: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario.cminus')
+    }
+    
+    lexemes = lexemize_file(examples_path[1])
     tokens = RegexPatternMatching().get_patterns_from_lexemes(lexemes)
     print(tokens)
