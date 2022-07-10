@@ -13,8 +13,9 @@ if __name__ == '__main__':
         1: os.path.join(os.path.dirname(__file__), 'examples/sort.cminus'),
         2: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario_simples.cminus'),
         3: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario_varias_linhas.cminus'),
-        4: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario.cminus')
+        4: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario.cminus'),
+        5: os.path.join(os.path.dirname(__file__), 'examples/declaracao.cminus')
     }
     
-    compiled_program = compiler(examples_path[1])
+    compiled_program = compiler(examples_path[5])
     print(compiled_program)
