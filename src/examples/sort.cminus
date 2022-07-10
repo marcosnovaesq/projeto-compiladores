@@ -37,8 +37,6 @@ void main(void)
     i = 0;
     while (i < 10)
     {
-        /* Somebody once to
-        ld me the world is gonna roll me */
         x[i] = input();
         i = i + 1;
     }
