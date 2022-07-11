@@ -91,9 +91,186 @@ class SyntaxAnalyzer():
         t.append(self.param_list())
         return t
 
-    def compound_stmt(self):
+    def is_a_type(token_type):
+        if token_type == 'INT' | token_type == 'VOID':
+            return True
+        return False
 
-        pass
+    def var_declaration(self):
+        # TODO colocar essa função dentro do declaration
+        type_spec = self.type_specifier()
+        id_value = self.match('ID')
+        t = Tree('declaration')
+
+        if self.current_token[1] == 'PCOMMA':
+            new_t = Tree('var-declaration', children=[
+                Tree('type-specifier', children=[Tree(type_spec[1], value=type_spec[0])]),
+                Tree('ID', value=id_value),
+                Tree('PCOMMA', ';')
+            ])
+            t.append_child(new_t)
+            self.match('PCOMMA')
+            return t
+
+        if self.current_token[1] == 'LSQRBRACKET':
+            self.match('LSQRBRACKET')
+            number = self.match('NUMBER')
+            self.match('RSQRBRACKET')
+            self.match('PCOMMA')
+
+            t.append_child(
+                Tree('var-declaration', children=[
+                    Tree('type-specifier', children=[Tree(type_spec[1], value=type_spec[0])]),
+                    Tree('ID', value=id_value),
+                    Tree('var-declaration-linha', children=[
+                        Tree('LSQRBRACKET','['),
+                        Tree('NUMBER',number),
+                        Tree('RSQRBRACKET',']'),
+                        Tree('PCOMMA',';')
+                    ]),
+                ])
+            )
+
+            return t
+
+        raise SyntaxError(f'unexpected token {self.current_token}')
+
+    def local_declarations(self):
+        t = Tree('local-declarations')
+        if self.is_a_type(self.current_token[1]):
+            new_node = self.var_declaration()
+
+        if new_node is not None:
+            t.append_child(new_node)
+            while self.is_a_type(self.current_token[1]):
+                new_node = self.var_declaration()
+                t.append_child(new_node)
+
+        return t
+
+    def arg_list(self):
+        t = Tree('arg-list')
+
+        node = self.expression()
+        t.append_child(node)
+        while self.current_token == 'COMMA':
+            self.match('COMMA')
+            node = self.expression()
+            t.append_child(node)
+        
+        return t
+
+    def args(self):
+        t = Tree('args')
+        if self.current_token[1] != 'RBRACKET':
+            t.append_child(
+                self.arg_list()
+            )
+        return t
+
+    def ident_statement(self):
+        id = self.match('ID')
+
+        if self.current_token[1] == 'LBRACKET':
+            self.match('LBRACKET')
+            arguments = self.args()
+            self.match('RBRACKET')
+
+    def expression(self):
+        t = Tree('expression')
+        got_l_value = False
+
+        if self.current_token[1] == 'ID':
+            left_value = self.ident_statement()
+            got_l_value = True
+        
+        if got_l_value and self.current_token[1] == 'ATTR':
+            pass #TODO CONTINUAR AQUI
+
+        return None
+        
+    def statement(self):
+        return None
+
+    def selection_statement(self):
+        logger.info('Entrou no selection statement')
+        t = Tree('selection-stmt')
+
+        self.match('IF')
+        self.match('LBRACKET')
+        expr = self.expression()
+        self.match('RBRACKET')
+
+        t.append_child(Tree('IF', 'if'))
+        t.append_child(Tree('LBRACKET', '('))
+        t.append_child(expr)
+        t.append_child(Tree('RBRACKET', ')'))
+        t.append_child(self.statement())
+
+        if self.current_token[1] == 'ELSE':
+            self.match('ELSE')
+            t.append_child(self.statement())
+        
+        return t
+
+    def statement(self):
+        t = Tree('statement')
+
+        if self.current_token[1] == 'IF':
+            t.append(
+                self.selection_statement()
+            ) 
+        elif self.current_token[1] == 'WHILE':
+            t.append(
+                self.iteration_statement()
+            ) 
+        elif self.current_token[1] == 'RETURN':
+            t.append(
+                self.return_statement()
+            )
+        elif self.current_token[1] == 'LBRACE':
+            t.append(
+                self.compound_stmt()
+            )
+        elif self.current_token[1] in ('ID', 'PCOMMA', 'LBRACKET', 'NUMBER'):
+            t.append(
+                self.expression_statement()
+            )
+        else:
+            raise SyntaxError(f'unexpected token {self.current_token}')
+            
+        return t
+
+    def statement_list(self):
+        t = Tree('statement-list')
+        if self.current_token['1'] != 'RBRACE':
+            node = self.statement()
+            t.append_child(node)
+            while self.current_token['1'] != 'RBRACE':
+                node = self.statement()
+                t.append_child(node)
+
+        return t
+
+    def compound_stmt(self):
+        t = Tree('compound-stmt', children=[
+            Tree('LBRACE', '{')
+        ])
+        self.match('LBRACE')
+
+        if self.current_token[1] != 'RBRACE':
+            if self.is_a_type(self.current_token[1]):
+                t.append_child(
+                    self.local_declarations()
+                )
+            if self.current_token[1] != 'RBRACE':
+                t.append_child(
+                    self.statement_list()
+                )
+
+        self.match('RBRACE')
+        t.append_child(Tree('RBRACE', '}'))
+        return Tree
 
     def declaration(self):
         '''
@@ -177,6 +354,3 @@ class SyntaxAnalyzer():
         '''
         logger.info('Inicializando análise sintática')
         return self.declaration_list()
-
-
-
