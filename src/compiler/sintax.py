@@ -169,30 +169,114 @@ class SyntaxAnalyzer():
         return t
 
     def ident_statement(self):
+        #TODO: Montar a arvore como na BNF
         id = self.match('ID')
+        #term...
 
+        t = Tree('term')
         if self.current_token[1] == 'LBRACKET':
             self.match('LBRACKET')
             arguments = self.args()
             self.match('RBRACKET')
+            t.append_child(arguments)
+        elif self.current_token[1] == 'LSQRBRACKET':
+            self.match('LSQRBRACKET')
+            expr = self.expression()
+            self.match('RSQRBRACKET')
+            t.append_child(arguments)
+        return t
+
+    def factor(self, left_value):
+        t = Tree('factor')
+        if left_value is not None:
+            return left_value
+        
+        if self.current_token[1] == 'ID':
+            node = self.ident_statement()
+        elif self.current_token[1] == 'LBRACKET':
+            self.match('LBRACKET')
+            node = self.expression()
+            self.match('RBRACKET')
+        elif self.current_token[1] == 'NUMBER':
+            node = Tree('NUMBER', value=int(self.current_token[0]))
+            self.match('NUMBER')
+        else:
+            raise SyntaxError('[factor] unexpected token')
+
+        t.append_child(node)
+
+        return t
+
+    def term(self, left_value):
+        t = Tree('term')
+
+        node = self.factor(left_value)
+        if node is not None:
+            t.append_child(node)
+
+        while self.current_token[1] == 'MULT' | self.current_token[1] == 'DIV':
+            self.match(self.current_token[1])
+            node = self.factor(None)
+            if node is not None:
+                t.append_child(node)
+
+        return t
+
+    def additive_expression(self, left_value):
+        t = Tree('additive-expression')
+
+        node = self.term(left_value)
+        if node is not None:
+            t.append_child(node)
+
+        while self.current_token[1] == 'PLUS' | self.current_token[1] == 'MINUS':
+            self.match(self.current_token[1])
+            node = self.term(None)
+            if node is not None:
+                t.append_child(node)
+        
+        return t
+
+    def simple_expression(self, left_value):
+        t = Tree('simple-expression')
+        left_expression = self.additive_expression(left_value)
+
+        if self.current_token[1] in ('LT', 'LE', 'GT', 'GE', 'EQ', 'NE'):
+            operator = self.match(self.current_token[1])
+            right_expression = self.additive_expression(None)
+            t.append_child(left_expression)
+            t.append_child(right_expression)
+            t.type = operator
+        else:
+            t.append_child(left_expression)
+
+        return t
 
     def expression(self):
         t = Tree('expression')
         got_l_value = False
-
+        left_value = None
         if self.current_token[1] == 'ID':
             left_value = self.ident_statement()
             got_l_value = True
         
         if got_l_value and self.current_token[1] == 'ATTR':
-            pass #TODO CONTINUAR AQUI
+            if left_value is not None:
+                self.match('ATTR')
+                right_value = self.expression()
+                t.append_child(left_value)
+                t.append_child(right_value)
+            else:
+                raise SyntaxError('Tentativa de atribuição inválida sem valor esquerdo')
+        else:
+            t.append_child(
+                self.simple_expression(left_value)
+            )
 
-        return None
+        return t
         
-    def statement(self):
-        return None
-
     def selection_statement(self):
+        #TODO adcionar os não terminais em uma arvore e montar o selection-stmt
         logger.info('Entrou no selection statement')
         t = Tree('selection-stmt')
 
@@ -212,6 +296,51 @@ class SyntaxAnalyzer():
             t.append_child(self.statement())
         
         return t
+
+    def iteration_statement(self):
+        self.match('WHILE')
+        self.match('LBRACKET')
+        expression = self.expression()
+        self.match('RBRACKET')
+        statement = self.statement()
+
+        return Tree('iteration-statement', children=[
+            Tree('WHILE', 'while'),
+            Tree('LBRACKET', '('),
+            expression,
+            Tree('RBRACKET', ')'),
+            statement
+        ])
+
+    def return_statement(self):
+        t = Tree('return-stmt')
+        self.match('RETURN')
+        t.append_child(Tree('RETURN', 'return'))
+
+
+        if self.current_token[1] != 'PCOMMA':
+            expression = self.expression()
+
+        if expression is not None:
+            t.append_child(expression)
+
+        self.match('PCOMMA')
+        t.append_child(Tree('PCOMMA', ';'))
+
+        return t
+
+    def expression_statement(self):
+        t = Tree('expression-stmt')
+        if self.current_token[1] == 'PCOMMA':
+            self.match('PCOMMA')
+            t.append_child(Tree('PCOMMA', ';'))
+        elif self.current_token[1] != 'RBRACE':
+            t.append_child(self.expression())
+            self.match('PCOMMA')
+            t.append_child(Tree('PCOMMA', ';'))
+        
+        return t
+
 
     def statement(self):
         t = Tree('statement')
