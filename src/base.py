@@ -1,11 +1,11 @@
 import os
 from compiler.lexical import lexical_analysis
-from compiler.sintax import sintax_analysis
+from compiler.sintax import SyntaxAnalyzer
 
 
 def compiler(filename):
     tokens = lexical_analysis(filename)
-    tree = sintax_analysis(tokens)
+    tree = SyntaxAnalyzer(tokens).sintax_analysis()
     return tree
 
 if __name__ == '__main__':
