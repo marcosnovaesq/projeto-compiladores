@@ -7,6 +7,15 @@ def compiler(filename):
     tree = SyntaxAnalyzer(tokens).sintax_analysis()
     return tree
 
+def print_list(lst, level=0):
+    print('    ' * (level - 1) + '+---' * (level > 0) + str(lst))
+    if hasattr(lst,'children'):
+        for l in lst.children:
+            if str(type(lst.children[0])) == "<class 'compiler.sintax.Tree'>":
+                print_list(l, level + 1)
+            else:
+                print('    ' * level + '+---' + str(l))
+
 if __name__ == '__main__':
     examples_path = {
         1: os.path.join(os.path.dirname(__file__), 'examples/sort.cminus'),
@@ -19,7 +28,8 @@ if __name__ == '__main__':
     
     try:
         compiled_program = compiler(examples_path[1])
-        print(compiled_program)
+        # print(compiled_program)
+        print_list(compiled_program)
     except SyntaxError as e:
         print(str(e))
     except Exception as e:
