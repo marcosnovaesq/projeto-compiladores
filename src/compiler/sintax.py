@@ -13,6 +13,8 @@ class Tree():
     def append_child(self, value): #value deve ser do tipo Tree
         self.children.append(value)
 
+    def __str__(self):
+        return f"{self.type} {self.value}"
 class SyntaxAnalyzer():
     def __init__(self, tokens):
         self.index = 0
@@ -28,7 +30,7 @@ class SyntaxAnalyzer():
             self.current_token = self.tokens[self.index]
             self.index += 1
         else:
-            raise SyntaxError('Out of bounds')
+            print("oi")
 
     def match(self, expected_token):
         if self.current_token[1] == expected_token:
@@ -39,7 +41,7 @@ class SyntaxAnalyzer():
             raise SyntaxError(f'[MATCH] Unexpected token {self.current_token}')
 
     def type_specifier(self):
-        if self.current_token[1] == 'INT' | self.current_token[1] == 'VOID' :
+        if self.current_token[1] == 'INT' or self.current_token[1] == 'VOID' :
             token = self.current_token
             self.get_token()
             return token
@@ -92,7 +94,7 @@ class SyntaxAnalyzer():
         return t
 
     def is_a_type(token_type):
-        if token_type == 'INT' | token_type == 'VOID':
+        if token_type == 'INT' or token_type == 'VOID':
             return True
         return False
 
@@ -214,7 +216,7 @@ class SyntaxAnalyzer():
         if node is not None:
             t.append_child(node)
 
-        while self.current_token[1] == 'MULT' | self.current_token[1] == 'DIV':
+        while self.current_token[1] == 'MULT' or self.current_token[1] == 'DIV':
             self.match(self.current_token[1])
             node = self.factor(None)
             if node is not None:
@@ -229,7 +231,7 @@ class SyntaxAnalyzer():
         if node is not None:
             t.append_child(node)
 
-        while self.current_token[1] == 'PLUS' | self.current_token[1] == 'MINUS':
+        while self.current_token[1] == 'PLUS' or self.current_token[1] == 'MINUS':
             self.match(self.current_token[1])
             node = self.term(None)
             if node is not None:
