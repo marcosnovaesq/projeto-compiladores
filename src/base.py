@@ -1,7 +1,6 @@
 import os
 from compiler.lexical import lexical_analysis
-from compiler.sintax import SyntaxAnalyzer
-
+from compiler.sintax import SyntaxAnalyzer, SyntaxError
 
 def compiler(filename):
     tokens = lexical_analysis(filename)
@@ -19,7 +18,9 @@ if __name__ == '__main__':
     }
     
     try:
-        compiled_program = compiler(examples_path[6])
+        compiled_program = compiler(examples_path[1])
         print(compiled_program)
-    except Exception as e:
+    except SyntaxError as e:
         print(str(e))
+    except Exception as e:
+        raise e

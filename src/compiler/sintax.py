@@ -1,3 +1,4 @@
+from re import S
 from utils.logger import logger
 
 class SyntaxError(Exception):
@@ -39,7 +40,7 @@ class SyntaxAnalyzer():
             self.get_token()
             return current_token_value
         else:
-            raise SyntaxError(f'[MATCH] Unexpected token', self.current_token)
+            raise SyntaxError(f'[MATCH] Unexpected token. Token Expected {expected_token}', self.current_token)
 
     def type_specifier(self):
         if self.current_token[1] == 'INT' or self.current_token[1] == 'VOID' :
@@ -57,7 +58,6 @@ class SyntaxAnalyzer():
         if self.current_token[1] == 'LSQRBRACKET':
             self.match('LSQRBRACKET')
             self.match('RSQRBRACKET')
-            t.append()
             return Tree('param', children=[
                 Tree('type-specifier', children=[Tree(type_spec[1], value=type_spec[0])]),
                 Tree('ID', value=id_value),
@@ -76,11 +76,12 @@ class SyntaxAnalyzer():
         param_list_node = Tree('param-list')
         
         node = self.param()
+        param_list_node.append_child(node)
 
         while node is not None and self.current_token[1] == 'COMMA':
-            param_list_node.append_child(node)
             self.match('COMMA')
             node = self.param()
+            param_list_node.append_child(node)
 
         return param_list_node
             
@@ -91,10 +92,10 @@ class SyntaxAnalyzer():
             t.append_child(Tree('VOID', void))
             return t
         
-        t.append(self.param_list())
+        t.append_child(self.param_list())
         return t
 
-    def is_a_type(token_type):
+    def is_a_type(self, token_type):
         if token_type == 'INT' or token_type == 'VOID':
             return True
         return False
@@ -156,7 +157,7 @@ class SyntaxAnalyzer():
 
         node = self.expression()
         t.append_child(node)
-        while self.current_token == 'COMMA':
+        while self.current_token[1] == 'COMMA':
             self.match('COMMA')
             node = self.expression()
             t.append_child(node)
@@ -177,17 +178,28 @@ class SyntaxAnalyzer():
         #term...
 
         t = Tree('term')
+        id_node = Tree('ID', id)
+        t.append_child(id_node)
         if self.current_token[1] == 'LBRACKET':
             self.match('LBRACKET')
             arguments = self.args()
             self.match('RBRACKET')
+
+            t.append_child(Tree('LBRACKET', '('))
             t.append_child(arguments)
+            t.append_child(Tree('RBRACKET', ')'))
+            return t
         elif self.current_token[1] == 'LSQRBRACKET':
             self.match('LSQRBRACKET')
             expr = self.expression()
             self.match('RSQRBRACKET')
-            t.append_child(arguments)
-        return t
+
+            t.append_child(Tree('LSQRBRACKET', '['))
+            t.append_child(expr)
+            t.append_child(Tree('RSQRBRACKET', ']'))
+            return t
+
+        return id_node
 
     def factor(self, left_value):
         t = Tree('factor')
@@ -195,7 +207,7 @@ class SyntaxAnalyzer():
             return left_value
         
         if self.current_token[1] == 'ID':
-            node = self.ident_statement()
+            node = self.ident_statement() #TOKEN var ou call
         elif self.current_token[1] == 'LBRACKET':
             self.match('LBRACKET')
             node = self.expression()
@@ -349,23 +361,23 @@ class SyntaxAnalyzer():
         t = Tree('statement')
 
         if self.current_token[1] == 'IF':
-            t.append(
+            t.append_child(
                 self.selection_statement()
             ) 
         elif self.current_token[1] == 'WHILE':
-            t.append(
+            t.append_child(
                 self.iteration_statement()
             ) 
         elif self.current_token[1] == 'RETURN':
-            t.append(
+            t.append_child(
                 self.return_statement()
             )
         elif self.current_token[1] == 'LBRACE':
-            t.append(
+            t.append_child(
                 self.compound_stmt()
             )
         elif self.current_token[1] in ('ID', 'PCOMMA', 'LBRACKET', 'NUMBER'):
-            t.append(
+            t.append_child(
                 self.expression_statement()
             )
         else:
@@ -375,10 +387,10 @@ class SyntaxAnalyzer():
 
     def statement_list(self):
         t = Tree('statement-list')
-        if self.current_token['1'] != 'RBRACE':
+        if self.current_token[1] != 'RBRACE':
             node = self.statement()
             t.append_child(node)
-            while self.current_token['1'] != 'RBRACE':
+            while self.current_token[1] != 'RBRACE':
                 node = self.statement()
                 t.append_child(node)
 
@@ -458,9 +470,11 @@ class SyntaxAnalyzer():
                 Tree('ID', value=id_value),
                 Tree('LBRACKET', '('),
                 self.params(),
-                Tree('RBRACKET', ')'),
-                self.compound_stmt()
+                
             ])
+            self.match('RBRACKET')
+            new_t.append_child(Tree('RBRACKET', ')'))
+            new_t.append_child(self.compound_stmt())                
             return new_t
 
         if self.current_token is not None:
