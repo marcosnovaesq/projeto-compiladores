@@ -36,7 +36,7 @@ class RegexPatternMatching():
         ('ID', r'[a-zA-Z]+'),  # IDENTIFIERS
         # ('NEWLINE', r'\n'),  # NEW LINE
         # ('SKIP', r'[ \t]+'),  # SPACE and TABS
-        ('MISMATCH', r'.')  # ANOTHER CHARACTER
+        ('MISMATCH', r'.+')  # ANOTHER CHARACTER
     ]
 
     def __init__(self):
@@ -64,11 +64,10 @@ class RegexPatternMatching():
         
         return tokens_list
 
-    def search_for_mismatchs(self, lexemes: List[str]) -> List[str]:
-        tokens = self.get_patterns_from_lexemes(lexemes)
-        for index, token in enumerate(tokens):
-            if token == 'MISMATCH':
-                print(lexemes[index])
+    def search_for_mismatchs(tokens):
+        for token in tokens:
+            if token[1] == 'MISMATCH':
+                raise Exception("UNKNOWN VALUE {token} IN LINE {line}".format(token=token[0], line=token[2]))
             
 
 def lexemize_file(filename):
@@ -131,4 +130,5 @@ def lexemize_file(filename):
 def lexical_analysis(filename):
     lexemes = lexemize_file(filename)
     tokens = RegexPatternMatching().get_patterns_from_lexemes(lexemes)
+    RegexPatternMatching.search_for_mismatchs(tokens)
     return tokens
