@@ -58,9 +58,9 @@ class RegexPatternMatching():
     def get_patterns_from_lexemes(self, lexemes: List[str]) -> List[str]:
         tokens_list = []
         for lex in lexemes:
-            token = self.get_pattern_rule_from_string(lex)
+            token = self.get_pattern_rule_from_string(lex[0])
             if token != 'COMMENT':
-                tokens_list.append((lex, self.get_pattern_rule_from_string(lex)))
+                tokens_list.append((lex[0], self.get_pattern_rule_from_string(lex[0]), lex[1]))
         
         return tokens_list
 
@@ -78,6 +78,7 @@ def lexemize_file(filename):
     lexemes = []
     with open(filename) as f:
         line = f.readline()
+        line_no = 1
         is_on_comment = False
         curr_tkn = ""
         while line:
@@ -86,17 +87,17 @@ def lexemize_file(filename):
                     curr_tkn += char
                     if '*/' in curr_tkn:
                         is_on_comment = False
-                        lexemes.append(curr_tkn)
+                        lexemes.append((curr_tkn,line_no))
                         curr_tkn = ""
                     continue
                 elif char == " ":
                     if curr_tkn != "":
-                        lexemes.append(curr_tkn)
+                        lexemes.append((curr_tkn,line_no))
                     curr_tkn = ""
                     continue
                 elif char in compound_first_char: #char eh < #curr_tkn = 9
                     if curr_tkn.isalpha() or curr_tkn.isnumeric(): # /* asdffaf *
-                        lexemes.append(curr_tkn)
+                        lexemes.append((curr_tkn,line_no))
                         curr_tkn = char
                         continue
                     curr_tkn += char
@@ -104,13 +105,13 @@ def lexemize_file(filename):
                         is_on_comment=True
                     continue
                 elif curr_tkn in compound_token_delimiters:
-                    lexemes.append(curr_tkn)
+                    lexemes.append((curr_tkn,line_no))
                     curr_tkn = char
                     continue
                 elif char in single_char_token_delimiters:
                     if curr_tkn != "":
-                        lexemes.append(curr_tkn)
-                    lexemes.append(char)
+                        lexemes.append((curr_tkn,line_no))
+                    lexemes.append((char,line_no))
                     curr_tkn = ""
                     continue
                 elif char.isalpha(): 
@@ -120,9 +121,10 @@ def lexemize_file(filename):
                     curr_tkn += char
                     continue
             if curr_tkn != "" and not is_on_comment:
-                lexemes.append(curr_tkn)
+                lexemes.append((curr_tkn,line_no))
                 curr_tkn = ""
             line = f.readline()
+            line_no += 1
     return lexemes
 
 
