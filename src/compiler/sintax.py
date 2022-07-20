@@ -10,17 +10,17 @@ class Tree():
         self.children = children
         self.value = value
 
-    def append_child(self, value): #value deve ser do tipo Tree
-        self.children.append(value)
+    def append_child(self, child): #value deve ser do tipo Tree
+        self.children = [*self.children, child]
 
     def __str__(self):
         return f"{self.type} {self.value}"
+
 class SyntaxAnalyzer():
     def __init__(self, tokens):
         self.index = 0
         self.current_token = None
         self.tokens = tokens
-        self.root = None
 
     def get_token(self):
         '''
@@ -30,7 +30,7 @@ class SyntaxAnalyzer():
             self.current_token = self.tokens[self.index]
             self.index += 1
         else:
-            print("oi")
+            raise SyntaxError('Out of bounds')
 
     def match(self, expected_token):
         if self.current_token[1] == expected_token:
@@ -465,15 +465,18 @@ class SyntaxAnalyzer():
         if self.current_token is not None:
             raise SyntaxError(f'unexpected token {self.current_token}')
 
-        return None
+        return t
 
     def declaration_list(self):
-        self.root = Tree('declaration-list')
+        root = Tree('declaration-list')
+
         self.get_token()
         d = self.declaration()
-        while d is not None:
-            self.root.append_child(d)
-            d = self.declaration()
+        root.append_child(d)
+        while self.current_token[0] != 'EOF':
+            root.append_child(self.declaration())
+        
+        return root
         
     def sintax_analysis(self):
         '''
@@ -484,4 +487,9 @@ class SyntaxAnalyzer():
         - Se não fechou um lexema e já lemos o final do arquivo -> deu ruim
         '''
         logger.info('Inicializando análise sintática')
-        return self.declaration_list()
+        t = self.declaration_list()
+
+        if self.current_token[0] != 'EOF':
+            raise SyntaxError("EOF expected")
+
+        return t

@@ -126,9 +126,15 @@ def lexemize_file(filename):
             line_no += 1
     return lexemes
 
+def add_eof(tokens):
+    last_line = tokens[-1][-1]
+    tokens.append(
+        ('EOF', 'EOF', last_line+1)
+    )
 
 def lexical_analysis(filename):
     lexemes = lexemize_file(filename)
     tokens = RegexPatternMatching().get_patterns_from_lexemes(lexemes)
     RegexPatternMatching.search_for_mismatchs(tokens)
+    add_eof(tokens)
     return tokens
