@@ -1,8 +1,9 @@
 from utils.logger import logger
 
 class SyntaxError(Exception):
-    def __init__(self, message):
-        super().__init__(f'Syntax error: {message}')
+    def __init__(self, message, token):
+        formatted_token_string = f'\nToken value: {token[0]}\nToken name: {token[1]}\nLine: {token[2]}'
+        super().__init__(f'[Syntax Error] {message} {formatted_token_string}')
 
 class Tree():
     def __init__(self, type, value='non-terminal', children = []):
@@ -30,7 +31,7 @@ class SyntaxAnalyzer():
             self.current_token = self.tokens[self.index]
             self.index += 1
         else:
-            raise SyntaxError('Out of bounds')
+            raise SyntaxError('Out of bounds', self.current_token)
 
     def match(self, expected_token):
         if self.current_token[1] == expected_token:
@@ -38,7 +39,7 @@ class SyntaxAnalyzer():
             self.get_token()
             return current_token_value
         else:
-            raise SyntaxError(f'[MATCH] Unexpected token {self.current_token}')
+            raise SyntaxError(f'[MATCH] Unexpected token', self.current_token)
 
     def type_specifier(self):
         if self.current_token[1] == 'INT' or self.current_token[1] == 'VOID' :
@@ -46,7 +47,7 @@ class SyntaxAnalyzer():
             self.get_token()
             return token
 
-        raise SyntaxError(f'[TYPE SPECIFIER] Expected a type identifier but got a {self.current_token}')
+        raise SyntaxError(f'[TYPE SPECIFIER] Expected a type identifier but got a {self.current_token[1]}', self.current_token)
 
     def param(self):
         type_spec = self.type_specifier()
@@ -135,7 +136,7 @@ class SyntaxAnalyzer():
 
             return t
 
-        raise SyntaxError(f'unexpected token {self.current_token}')
+        raise SyntaxError(f'Unexpected token', self.current_token)
 
     def local_declarations(self):
         t = Tree('local-declarations')
@@ -203,7 +204,7 @@ class SyntaxAnalyzer():
             node = Tree('NUMBER', value=int(self.current_token[0]))
             self.match('NUMBER')
         else:
-            raise SyntaxError('[factor] unexpected token')
+            raise SyntaxError('[factor] unexpected token', self.current_token)
 
         t.append_child(node)
 
@@ -269,7 +270,7 @@ class SyntaxAnalyzer():
                 t.append_child(left_value)
                 t.append_child(right_value)
             else:
-                raise SyntaxError('Tentativa de atribuição inválida sem valor esquerdo')
+                raise SyntaxError('Tentativa de atribuição inválida sem valor esquerdo', self.current_token)
         else:
             t.append_child(
                 self.simple_expression(left_value)
@@ -368,7 +369,7 @@ class SyntaxAnalyzer():
                 self.expression_statement()
             )
         else:
-            raise SyntaxError(f'unexpected token {self.current_token}')
+            raise SyntaxError(f'unexpected token', self.current_token)
             
         return t
 
@@ -463,7 +464,7 @@ class SyntaxAnalyzer():
             return new_t
 
         if self.current_token is not None:
-            raise SyntaxError(f'unexpected token {self.current_token}')
+            raise SyntaxError(f'unexpected token', self.current_token)
 
         return t
 
@@ -490,6 +491,6 @@ class SyntaxAnalyzer():
         t = self.declaration_list()
 
         if self.current_token[0] != 'EOF':
-            raise SyntaxError("EOF expected")
+            raise SyntaxError("EOF expected", self.current_token)
 
         return t

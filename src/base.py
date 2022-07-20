@@ -14,8 +14,12 @@ if __name__ == '__main__':
         2: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario_simples.cminus'),
         3: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario_varias_linhas.cminus'),
         4: os.path.join(os.path.dirname(__file__), 'examples/teste_comentario.cminus'),
-        5: os.path.join(os.path.dirname(__file__), 'examples/declaracao.cminus')
+        5: os.path.join(os.path.dirname(__file__), 'examples/analise_sintatica/declaracao.cminus'),
+        6: os.path.join(os.path.dirname(__file__), 'examples/analise_sintatica/errado_declaracao.cminus')
     }
     
-    compiled_program = compiler(examples_path[5])
-    print(compiled_program)
+    try:
+        compiled_program = compiler(examples_path[6])
+        print(compiled_program)
+    except Exception as e:
+        print(str(e))
